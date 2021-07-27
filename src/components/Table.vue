@@ -45,7 +45,13 @@
         <label for="file-upload" class="custom-file-upload">
           Import CSV :
         </label>
-        <input style="disp" type="file" class="file" @change="handleCsvFile" />
+        <input
+          style="disp"
+          type="file"
+          class="file"
+          @change="handleCsvFile"
+          accept=".csv"
+        />
       </div>
     </div>
   </div>
