@@ -44,6 +44,8 @@ export default {
 .logo {
   display: flex;
   flex-direction: row;
+  justify-content: space-evenly;
+  align-items: center;
   justify-content: flex-start;
   height: 40px;
   width: 100%;
@@ -56,9 +58,11 @@ export default {
   background-clip: padding-box;
 }
 h1 {
-  font-size: 16px;
-  font-family: "Nunito", sans-serif;
+  font-size: 20px;
+  font-family: "Mogra", cursive, sans-serif;
   font-weight: 900;
+  color: #7367f0;
+  margin-left: 5px;
 }
 button {
   border-radius: 5px;

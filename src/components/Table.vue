@@ -1,5 +1,7 @@
 <template>
   <div class="agenda-warrper">
+    <h1 class="header">Aganda</h1>
+
     <div class="tab">
       <table>
         <tr>
@@ -40,7 +42,9 @@
     <div class="btns">
       <button @click="exportJSONToCSV">Export CSV</button>
       <div>
-        <label for="file-upload" class="custom-file-upload"> Import CSV </label>
+        <label for="file-upload" class="custom-file-upload">
+          Import CSV :
+        </label>
         <input style="disp" type="file" class="file" @change="handleCsvFile" />
       </div>
     </div>
@@ -232,6 +236,7 @@ tr:nth-child(even) {
   display: flex;
   flex-direction: row;
   justify-content: space-evenly;
+  padding: 5px;
 }
 .btns {
   width: 500px;
@@ -239,5 +244,13 @@ tr:nth-child(even) {
   display: flex;
   flex-direction: row;
   justify-content: space-evenly;
+}
+.header {
+  width: 100%;
+  text-align: center;
+  font-size: 40px;
+  font-family: "Mogra", cursive, sans-serif;
+  font-weight: 900;
+  color: #7367f0;
 }
 </style>
