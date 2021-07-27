@@ -11,7 +11,7 @@
           <th>updated_at</th>
           <th>Action</th>
         </tr>
-        <tr v-for="data in agendas" v-bind:key="data.name">
+        <tr v-for="data in agendas" v-bind:key="data.id">
           <td>{{ data.name }}</td>
           <td>{{ data.description }}</td>
           <td>{{ formateDate(data.date) }}</td>
@@ -20,15 +20,27 @@
           <td>{{ formateDate(data.updated_at) }}</td>
 
           <td class="tdc">
-            <img src="../assets/edit-line.png" alt="edit" srcset="" />
-            <img src="../assets/delete-bin-line.png" alt="delete" srcset="" />
+            <img
+              src="../assets/edit-line.png"
+              alt="edit"
+              style="cursor: pointer"
+            />
+            <img
+              src="../assets/delete-bin-line.png"
+              style="cursor: pointer"
+              alt="delete"
+              @click="deleteAgenda(data.id)"
+            />
           </td>
         </tr>
       </table>
     </div>
     <div class="btns">
-      <button>Export CSV</button>
-      <button>Import CSV</button>
+      <button @click="exportJSONToCSV">Export CSV</button>
+      <div>
+        <label for="file-upload" class="custom-file-upload"> Import CSV </label>
+        <input style="disp" type="file" @change="handleCsvFile" />
+      </div>
     </div>
   </div>
 </template>
@@ -49,13 +61,117 @@ export default {
       .collection("agenda")
       .get()
       .then((snapshot) => {
-        this.agendas = snapshot.docs.map((doc) => doc.data());
+        this.agendas = snapshot.docs.map((doc) => {
+          return {
+            id: doc.id,
+            ...doc.data(),
+          };
+        });
       });
   },
 
   methods: {
+    handleCsvFile(e) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const json = this.csvTextToJson(reader.result);
+        this.addDatatoFirestore(json);
+      };
+
+      reader.readAsText(e.target.files[0]);
+    },
+
+    addDatatoFirestore(data) {
+      for (let i = 0; i < data.length; i++) {
+        firestore
+          .collection("agenda")
+          .add({
+            ...data[i],
+            date: new Date(data[i].date),
+            created_at: new Date(data[i].created_at),
+            updated_at: new Date(data[i].updated_at),
+          })
+          .then((docRef) => {
+            if (i === data.length - 1) {
+              this.$emit("close");
+              window.location.reload();
+            }
+          })
+          .catch((err) => alert(err));
+      }
+    },
+    deleteAgenda(id) {
+      firestore
+        .collection("agenda")
+        .doc(id)
+        .delete()
+        .then(() => {
+          window.location.reload();
+        })
+        .catch((err) => alert(err));
+    },
     formateDate(data) {
       return dayjs(data.toDate()).format("MMMM D, YYYY h:mm A");
+    },
+
+    csvTextToJson(csv) {
+      var lines = csv.split("\n");
+
+      var result = [];
+
+      var headers = lines[0].split(",");
+
+      for (var i = 1; i < lines.length; i++) {
+        var obj = {};
+        var currentline = lines[i].split(",");
+
+        for (var j = 0; j < headers.length; j++) {
+          obj[headers[j].trim()] = currentline[j].replaceAll('"', "");
+        }
+
+        result.push(obj);
+      }
+
+      return result;
+    },
+
+    exportJSONToCSV() {
+      const filename = Math.random().toString(36).substr(2, 9) + ".csv";
+      const replacer = (key, value) => (value === null ? "" : value);
+      const header = Object.keys(this.agendas[0]).filter((e) => e !== "id");
+      const sorted_headers = header.sort((a, b) => a - b);
+
+      let csv = this.agendas.map((row) =>
+        sorted_headers
+          .map((fieldName) => {
+            if (
+              fieldName === "date" ||
+              fieldName === "created_at" ||
+              fieldName === "updated_at"
+            ) {
+              return JSON.stringify(
+                this.formateDate(row[fieldName]),
+                replacer
+              ).replace(/,/g, "");
+            }
+
+            return JSON.stringify(row[fieldName], replacer).replace(/,/g, "");
+          })
+          .join(",")
+      );
+      csv.unshift(header.join(","));
+      csv = csv.join("\r\n");
+
+      var link = document.createElement("a");
+      link.setAttribute(
+        "href",
+        "data:text/csv;charset=utf-8,%EF%BB%BF" + encodeURIComponent(csv)
+      );
+      link.setAttribute("download", filename);
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     },
   },
 };
@@ -70,6 +186,10 @@ export default {
 .tab {
   width: 100%;
 }
+
+/* input[type="file"] {
+  display: none;
+} */
 table {
   font-family: "Nunito", sans-serif;
   border-collapse: collapse;
