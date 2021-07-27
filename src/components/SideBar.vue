@@ -1,14 +1,34 @@
 <template>
   <div class="side-bar">
+    <Modal v-if="showModal" @close="showModal = false" />
     <div class="logo">
       <img src="../assets/Logo.png" class="logo-app" alt="logo" />
       <h1>Aganda</h1>
     </div>
-    <button>Add new agenda</button>
+    <button v-on:click="openModal">Add new agenda</button>
   </div>
 </template>
 
-<script setup></script>
+<script>
+import Modal from "../components/Modal.vue";
+
+export default {
+  name: "sidebar",
+  components: {
+    Modal,
+  },
+  methods: {
+    openModal() {
+      this.showModal = !this.showModal;
+    },
+  },
+  data() {
+    return {
+      showModal: false,
+    };
+  },
+};
+</script>
 
 <style>
 .side-bar {

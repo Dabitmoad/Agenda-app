@@ -2,13 +2,13 @@
   <div class="app">
     <SideBar />
     <Table />
+    <Modal />
   </div>
 </template>
 
 <script>
 import SideBar from "./components/SideBar.vue";
 import Table from "./components/Table.vue";
-import firestore from "./service/firebase";
 
 export default {
   name: "db",
