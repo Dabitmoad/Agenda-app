@@ -5,9 +5,28 @@
   </div>
 </template>
 
-<script setup>
+<script>
 import SideBar from "./components/SideBar.vue";
 import Table from "./components/Table.vue";
+import firestore from "./service/firebase";
+
+export default {
+  name: "db",
+  components: {
+    SideBar,
+    Table,
+  },
+
+  created() {
+    firestore
+      .collection("agenda")
+      .get()
+      .then((snapshot) => {
+        const agenda = snapshot.docs.map((doc) => doc.data());
+        console.log(agenda);
+      });
+  },
+};
 </script>
 
 <style>
