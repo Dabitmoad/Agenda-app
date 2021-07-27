@@ -14,16 +14,17 @@
         <tr v-for="data in agendas" v-bind:key="data.id">
           <td>{{ data.name }}</td>
           <td>{{ data.description }}</td>
-          <td>{{ formateDate(data.date) }}</td>
+          <td>{{ formatDate(data.date) }}</td>
           <td>{{ data.status }}</td>
-          <td>{{ formateDate(data.created_at) }}</td>
-          <td>{{ formateDate(data.updated_at) }}</td>
+          <td>{{ formatDate(data.created_at) }}</td>
+          <td>{{ formatDate(data.updated_at) }}</td>
 
           <td class="tdc">
             <img
               src="../assets/edit-line.png"
               alt="edit"
               style="cursor: pointer"
+              @click="openModal(data.id)"
             />
             <img
               src="../assets/delete-bin-line.png"
@@ -34,12 +35,13 @@
           </td>
         </tr>
       </table>
+      <Modal v-if="showModal" @close="showModal = false" :agendaId="editId" />
     </div>
     <div class="btns">
       <button @click="exportJSONToCSV">Export CSV</button>
       <div>
         <label for="file-upload" class="custom-file-upload"> Import CSV </label>
-        <input style="disp" type="file" @change="handleCsvFile" />
+        <input style="disp" type="file" class="file" @change="handleCsvFile" />
       </div>
     </div>
   </div>
@@ -47,12 +49,18 @@
 
 <script>
 import firestore from "../service/firebase";
+import Modal from "../components/Modal.vue";
 export default {
   name: "table",
+  components: {
+    Modal,
+  },
 
   data() {
     return {
       agendas: [],
+      showModal: false,
+      editId: "",
     };
   },
 
@@ -71,6 +79,10 @@ export default {
   },
 
   methods: {
+    openModal(id) {
+      this.editId = id;
+      this.showModal = !this.showModal;
+    },
     handleCsvFile(e) {
       const reader = new FileReader();
       reader.onload = () => {
@@ -93,7 +105,6 @@ export default {
           })
           .then((docRef) => {
             if (i === data.length - 1) {
-              this.$emit("close");
               window.location.reload();
             }
           })
@@ -110,7 +121,7 @@ export default {
         })
         .catch((err) => alert(err));
     },
-    formateDate(data) {
+    formatDate(data) {
       return dayjs(data.toDate()).format("MMMM D, YYYY h:mm A");
     },
 
@@ -150,7 +161,7 @@ export default {
               fieldName === "updated_at"
             ) {
               return JSON.stringify(
-                this.formateDate(row[fieldName]),
+                this.formatDate(row[fieldName]),
                 replacer
               ).replace(/,/g, "");
             }
@@ -195,6 +206,12 @@ table {
   border-collapse: collapse;
   min-width: 80vw;
   margin: 80px auto;
+}
+.file {
+  background: linear-gradient(45deg, #7367f0, #9e95f5);
+  color: white;
+  cursor: pointer;
+  padding: 10px;
 }
 
 td,

@@ -1,6 +1,6 @@
 <template>
   <div class="format">
-    <form action="" @submit="addAgenda">
+    <form action="" @submit="addOrEditAgenda">
       <label>Name</label>
       <input type="text" placeholder="Name" v-model="name" required />
 
@@ -21,7 +21,10 @@
         <option value="option3">option3</option>
         <option value="option4">option4</option>
       </select>
-      <button type="submit">Add a Agenda</button>
+      <button
+        type="submit"
+        v-text="agendaId ? 'Edit agenda' : 'Add agenda'"
+      ></button>
       <button @click="$emit('close')">Close</button>
     </form>
   </div>
@@ -38,9 +41,55 @@ export default {
       status: "",
     };
   },
+
+  created() {
+    if (this.agendaId) {
+      firestore
+        .collection("agenda")
+        .doc(this.agendaId)
+        .get()
+        .then((querySnapshot) => {
+          const data = querySnapshot.data();
+          this.name = data.name;
+          this.description = data.description;
+          this.date = dayjs(data.date.toDate()).format("YYYY-MM-DD");
+          this.status = data.status;
+        })
+        .catch((error) => {
+          console.log("Error getting documents: ", error);
+        });
+    }
+  },
+  props: {
+    agendaId: String,
+  },
   methods: {
-    addAgenda(e) {
+    addOrEditAgenda(e) {
       e.preventDefault();
+
+      // edit agenda
+      if (this.agendaId) {
+        firestore
+          .collection("agenda")
+          .doc(this.agendaId)
+          .update({
+            name: this.name,
+            description: this.description,
+            date: new Date(this.date),
+            status: this.status,
+            updated_at: new Date(),
+          })
+          .then(() => {
+            this.$emit("close");
+            window.location.reload();
+          })
+          .catch((error) => {
+            console.error("Error writing document: ", error);
+          });
+        return;
+      }
+
+      // add agenda
       firestore
         .collection("agenda")
         .add({
