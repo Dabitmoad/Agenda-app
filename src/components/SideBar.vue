@@ -44,7 +44,7 @@ button {
   border-radius: 5px;
   outline: none;
   border: none;
-  padding: 10px;
+  padding: 15px;
   font-size: 16px;
   background: linear-gradient(45deg, #7367f0, #9e95f5);
   color: azure;
