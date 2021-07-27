@@ -3,7 +3,7 @@
     <div class="tab">
       <table>
         <tr>
-          <th>Full-name</th>
+          <th>Name</th>
           <th>description</th>
           <th>date</th>
           <th>status</th>
@@ -11,25 +11,14 @@
           <th>updated_at</th>
           <th>Action</th>
         </tr>
-        <tr>
-          <td>Jill</td>
-          <td>Smith</td>
-          <td>50</td>
-          <td>Jill</td>
-          <td>Smith</td>
-          <td>50</td>
-          <td class="tdc">
-            <img src="../assets/edit-line.png" alt="edit" srcset="" />
-            <img src="../assets/delete-bin-line.png" alt="delete" srcset="" />
-          </td>
-        </tr>
-        <tr>
-          <td>Eve</td>
-          <td>Jackson</td>
-          <td>94</td>
-          <td>Jill</td>
-          <td>Smith</td>
-          <td>50</td>
+        <tr v-for="data in agendas" v-bind:key="data.name">
+          <td>{{ data.name }}</td>
+          <td>{{ data.description }}</td>
+          <td>{{ formateDate(data.date) }}</td>
+          <td>{{ data.status }}</td>
+          <td>{{ formateDate(data.created_at) }}</td>
+          <td>{{ formateDate(data.updated_at) }}</td>
+
           <td class="tdc">
             <img src="../assets/edit-line.png" alt="edit" srcset="" />
             <img src="../assets/delete-bin-line.png" alt="delete" srcset="" />
@@ -44,7 +33,33 @@
   </div>
 </template>
 
-<script setup></script>
+<script>
+import firestore from "../service/firebase";
+export default {
+  name: "table",
+
+  data() {
+    return {
+      agendas: [],
+    };
+  },
+
+  beforeCreate() {
+    firestore
+      .collection("agenda")
+      .get()
+      .then((snapshot) => {
+        this.agendas = snapshot.docs.map((doc) => doc.data());
+      });
+  },
+
+  methods: {
+    formateDate(data) {
+      return dayjs(data.toDate()).format("MMMM D, YYYY h:mm A");
+    },
+  },
+};
+</script>
 
 <style>
 .agenda-warrper {

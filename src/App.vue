@@ -16,16 +16,6 @@ export default {
     SideBar,
     Table,
   },
-
-  created() {
-    firestore
-      .collection("agenda")
-      .get()
-      .then((snapshot) => {
-        const agenda = snapshot.docs.map((doc) => doc.data());
-        console.log(agenda);
-      });
-  },
 };
 </script>
 
